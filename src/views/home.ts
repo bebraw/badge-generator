@@ -23,8 +23,7 @@ export function renderHomePage(routes: Array<{ path: string; purpose: string }>)
       <header class="lg:col-span-3">
         <div class="flex flex-col gap-4 border-b border-line pb-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p class="text-xs font-bold uppercase text-green">Future Frontend 2026</p>
-            <h1 class="mt-2 max-w-4xl text-4xl font-bold leading-[0.95] sm:text-6xl">${escapeHtml(appTitle)}</h1>
+            <h1 class="max-w-4xl text-4xl font-bold leading-[0.95] sm:text-6xl">${escapeHtml(appTitle)}</h1>
           </div>
           <div class="grid gap-1 text-sm text-muted sm:grid-cols-3 lg:min-w-[33rem]">
             <p><strong class="block text-ink">100 mm</strong> round coaster</p>
