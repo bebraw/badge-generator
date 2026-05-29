@@ -16,11 +16,11 @@ We will disallow executable browser code inline in Worker-rendered HTML.
 
 The fast quality gate now runs `scripts/assert-no-worker-client-scripts.mjs`, which scans `src/worker.ts` and runtime view files under `src/views/` for:
 
-- inline `<script>` tags
+- inline `<script>` tags, while allowing external `src` script tags that point at typed client modules
 - inline event-handler attributes such as `onclick=`
 - `javascript:` URLs
 
-When a project needs client behavior, that behavior should be written in typed TypeScript modules and served through an explicit client build or asset path instead of embedded inside Worker HTML strings.
+When a project needs client behavior, that behavior should be written in typed TypeScript modules and served through an explicit client build or asset path instead of embedded inside Worker HTML strings. Worker views may reference those modules with external script tags.
 
 ## Trigger
 

@@ -25,6 +25,7 @@ The template needs a verification baseline that stays strict enough for end-to-e
 - **Package manager hint source:** `package.json#packageManager`
 - **Browser runtime image:** `mcr.microsoft.com/playwright:v1.60.0-noble`
 - **Coverage gate logic:** `scripts/run-coverage-gate.mjs`
+- **Coverage exception:** browser modules under `src/client/**` are covered by Playwright instead of Vitest or Stryker
 - **Worker client-code guard:** `scripts/assert-no-worker-client-scripts.mjs`
 - **Mutation config:** `stryker.config.mjs`
 - **Readiness baseline:** `npm run quality:gate` and `npm run ci:local` for non-documentation changes
@@ -66,8 +67,9 @@ The template needs a verification baseline that stays strict enough for end-to-e
 - The CI workflow must pin every GitHub Actions `uses:` action reference to a full commit SHA, with any tag information kept only as a comment.
 - The browser CI job must use the pinned Playwright container instead of reinstalling Chromium at runtime.
 - The coverage gate must only require unit tests when runtime `src/` code exists.
+- Browser modules under `src/client/**` must stay excluded from Vitest coverage and Stryker mutation testing, and covered by Playwright browser tests.
 - The coverage gate must work in both the normal workspace and local Agent CI's warmed `node_modules` layout.
-- The Worker client-code guard must fail on inline `<script>` tags, inline event-handler attributes, and `javascript:` URLs in Worker/view runtime files.
+- The Worker client-code guard must fail on inline `<script>` tags, inline event-handler attributes, and `javascript:` URLs in Worker/view runtime files while allowing external script tags with `src` attributes.
 - The affected guardrail path must pass only affected Worker/view runtime files to the Worker client-code guard.
 - The affected guardrail path must run JavaScript syntax checks only for affected JavaScript files.
 - The affected guardrail path must run package audit only when package metadata or lockfiles change.

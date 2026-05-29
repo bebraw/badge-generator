@@ -5,12 +5,9 @@ import { join, relative } from "node:path";
 const repoRoot = fileURLToPath(new URL("..", import.meta.url));
 const runtimeRoots = ["src/worker.ts", "src/views"];
 const ignoredFilePatterns = [/\.test\.ts$/, /\.e2e\.ts$/, /\.d\.ts$/];
+const scriptTagPattern = /<script\b(?<attributes>[^>]*)>(?<body>[\s\S]*?)<\/script>|<script\b(?<selfClosingAttributes>[^>]*)\/?>/giu;
 
 const disallowedPatterns = [
-  {
-    name: "inline <script> tag",
-    pattern: /<script(?:\s|>|\/)/giu,
-  },
   {
     name: "inline event handler attribute",
     pattern: /\son[a-z]+\s*=/giu,
@@ -28,6 +25,15 @@ const violations = [];
 for (const file of files) {
   const source = await readFile(file, "utf8");
 
+  for (const match of source.matchAll(scriptTagPattern)) {
+    const attributes = match.groups?.attributes ?? match.groups?.selfClosingAttributes ?? "";
+    const body = match.groups?.body ?? "";
+
+    if (!hasExternalScriptSource(attributes) || body.trim() !== "") {
+      violations.push(formatViolation(file, source, match.index ?? 0, "inline <script> tag"));
+    }
+  }
+
   for (const { name, pattern } of disallowedPatterns) {
     for (const match of source.matchAll(pattern)) {
       violations.push(formatViolation(file, source, match.index ?? 0, name));
@@ -41,6 +47,10 @@ if (violations.length > 0) {
   console.error("");
   console.error(violations.join("\n"));
   process.exitCode = 1;
+}
+
+function hasExternalScriptSource(attributes) {
+  return /\ssrc\s*=/iu.test(` ${attributes}`);
 }
 
 async function collectRuntimeFiles(paths) {

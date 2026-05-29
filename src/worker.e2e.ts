@@ -6,7 +6,7 @@ test("renders the worker home page", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1, name: "Future Frontend Badge Generator" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "Badge artwork" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Print speakers" })).toBeVisible();
-  await expect(page.getByText("Ada Lovelace")).toBeVisible();
+  await expect(page.locator("#badge-preview").getByRole("heading", { name: "Ada Lovelace" })).toBeVisible();
   await expect(page.locator(".badge").first()).toBeVisible();
 });
 
@@ -35,6 +35,6 @@ test("imports CSV rows in the browser", async ({ page }) => {
   await page.getByRole("button", { name: "Update badges" }).click();
 
   await expect(page.getByText("1 badge ready.")).toBeVisible();
-  await expect(page.getByText("Edsger Dijkstra")).toBeVisible();
-  await expect(page.getByText("Technische Universiteit Eindhoven")).toBeVisible();
+  await expect(page.locator("#people-list").getByText("Edsger Dijkstra")).toBeVisible();
+  await expect(page.locator("#badge-preview").getByText("Technische Universiteit Eindhoven")).toBeVisible();
 });
