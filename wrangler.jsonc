@@ -4,13 +4,13 @@
   "main": "src/worker.ts",
   "compatibility_date": "2026-03-28",
   "build": {
-    "command": "npm run build:css",
+    "command": "npm run build:assets",
     "watch_dir": "src",
   },
   "rules": [
     {
       "type": "Text",
-      "globs": ["**/*.css"],
+      "globs": ["**/*.css", "**/*.client.js", "**/*.svg"],
       "fallthrough": true,
     },
   ],

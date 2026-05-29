@@ -143,4 +143,3 @@ function parseCsvRecords(csv: string): CsvRecord[] {
 function trimCarriageReturn(value: string): string {
   return value.endsWith("\r") ? value.slice(0, -1) : value;
 }
-

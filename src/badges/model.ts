@@ -21,4 +21,3 @@ export interface CsvParseResult {
 export function isBadgeType(value: string): value is BadgeType {
   return badgeTypes.includes(value as BadgeType);
 }
-

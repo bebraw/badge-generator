@@ -20,4 +20,3 @@ The Worker serves the generated module as `/badge-app.js`. HTML views reference 
 - `.generated` remains the only generated write target.
 - The Worker keeps serving server-rendered HTML while the browser module owns local CSV import and print-state behavior.
 - Future richer client work may justify a dedicated bundler, but this project does not need one yet.
-

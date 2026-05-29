@@ -130,7 +130,7 @@ Until printer-specific details are known, the safest first milestone is a browse
 - Copy `.dev.vars.example` to `.dev.vars` before running projects that need local secrets.
 - Use repo-pinned CLI tools through `npx`, including `npx wrangler`.
 - Start the Worker with `npm run dev`, then open `http://127.0.0.1:8787`.
-- Rebuild the generated Tailwind stylesheet manually with `npm run build:css` when needed.
+- Rebuild generated CSS and browser JavaScript manually with `npm run build:assets` when needed.
 
 ## Verification
 
@@ -149,5 +149,7 @@ Until printer-specific details are known, the safest first milestone is a browse
 
 - `src/worker.ts` is the Worker entry point and top-level router.
 - `src/api/` holds API response modules such as the health endpoint.
+- `src/badges/` holds badge domain models and CSV parsing.
+- `src/client/` holds the typed browser module that is built into `.generated/badge-app.client.js`.
 - `src/views/` holds HTML rendering modules.
 - Tests live next to the code they exercise under `src/`.

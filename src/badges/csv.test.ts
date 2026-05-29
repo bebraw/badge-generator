@@ -49,4 +49,3 @@ Linus Torvalds,Linux Foundation,attendee`),
     });
   });
 });
-

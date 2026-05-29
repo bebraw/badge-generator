@@ -65,4 +65,3 @@ The parser must:
 - The application provides separate print views for speakers, organizers, and attendees.
 - Print guides for trim, safe area, and hole placement may be visible in preview and configurable for print.
 - Until printer-specific imposition details are known, any A4 layout is acceptable if it is easy to print and preserves physical badge dimensions.
-

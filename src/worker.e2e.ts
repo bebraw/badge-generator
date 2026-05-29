@@ -3,12 +3,11 @@ import { expect, test } from "@playwright/test";
 test("renders the worker home page", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page.getByRole("heading", { level: 1, name: "vibe-template Worker" })).toBeVisible();
-  await expect(
-    page.getByText("A runnable Cloudflare Worker baseline with a route index, a health probe, and room for real feature work."),
-  ).toBeVisible();
-  await expect(page.getByRole("heading", { level: 2, name: "Route Index" })).toBeVisible();
-  await expect(page.locator('a[href="/api/health"]').first()).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Future Frontend Badge Generator" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Badge artwork" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Print speakers" })).toBeVisible();
+  await expect(page.getByText("Ada Lovelace")).toBeVisible();
+  await expect(page.locator(".badge").first()).toBeVisible();
 });
 
 test("serves the health endpoint", async ({ request }) => {
@@ -17,8 +16,8 @@ test("serves the health endpoint", async ({ request }) => {
   expect(response.ok()).toBe(true);
   await expect(response.json()).resolves.toEqual({
     ok: true,
-    name: "vibe-template-worker",
-    routes: ["/", "/api/health"],
+    name: "badge-generator-worker",
+    routes: ["/", "/badge-app.js", "/assets/future-frontend-2026.svg", "/api/health"],
   });
 });
 
@@ -27,5 +26,15 @@ test("serves the generated stylesheet", async ({ request }) => {
 
   expect(response.ok()).toBe(true);
   expect(response.headers()["content-type"]).toContain("text/css");
-  await expect(response.text()).resolves.toContain("--color-app-canvas:#f3eee6");
+  await expect(response.text()).resolves.toContain("--color-paper");
+});
+
+test("imports CSV rows in the browser", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("CSV contents").fill("name,company,type\nEdsger Dijkstra,Technische Universiteit Eindhoven,speaker");
+  await page.getByRole("button", { name: "Update badges" }).click();
+
+  await expect(page.getByText("1 badge ready.")).toBeVisible();
+  await expect(page.getByText("Edsger Dijkstra")).toBeVisible();
+  await expect(page.getByText("Technische Universiteit Eindhoven")).toBeVisible();
 });

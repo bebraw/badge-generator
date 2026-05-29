@@ -1,5 +1,5 @@
 {
-  "name": "vibe-template",
+  "name": "badge-generator",
   "private": true,
   "packageManager": "npm@11",
   "engines": {
@@ -13,6 +13,9 @@
     }
   },
   "scripts": {
+    "build": "npm run build:assets",
+    "build:assets": "npm run build:css && npm run build:client",
+    "build:client": "node ./scripts/build-client.mjs",
     "build:css": "mkdir -p ./.generated && tailwindcss -i ./src/tailwind-input.css -o ./.generated/styles.css --minify",
     "ci:local": "agent-ci run --quiet --jobs 1 --workflow .github/workflows/ci.yml",
     "ci:local:retry": "agent-ci retry",
