@@ -22,6 +22,11 @@ const roleLabels: Record<BadgeType, string> = {
   organizer: "Organizer",
   attendee: "Attendee",
 };
+const previewPeople: Record<BadgeType, BadgePerson> = {
+  speaker: { name: "Ada Lovelace", company: "Analytical Engines", type: "speaker" },
+  organizer: { name: "Grace Hopper", type: "organizer" },
+  attendee: { name: "Linus Torvalds", company: "Linux Foundation", type: "attendee" },
+};
 
 let people: BadgePerson[] = [];
 let previewRole: BadgeType = "speaker";
@@ -79,7 +84,8 @@ document.querySelectorAll<HTMLButtonElement>("[data-print-role]").forEach((butto
   });
 });
 
-loadCsv(csvInput.value);
+statusElement.textContent = "No CSV imported yet. Preview uses sample badges.";
+render();
 
 function loadCsv(csv: string): void {
   const result = parseBadgeCsv(csv);
@@ -103,11 +109,7 @@ function render(): void {
 }
 
 function renderPreview(): void {
-  const person = people.find((candidate) => candidate.type === previewRole) ?? {
-    name: `${roleLabels[previewRole]} Name`,
-    company: "Company",
-    type: previewRole,
-  };
+  const person = people.find((candidate) => candidate.type === previewRole) ?? previewPeople[previewRole];
 
   previewElement.innerHTML = renderBadge(person, { guides: true });
 }

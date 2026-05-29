@@ -7,6 +7,8 @@ test("renders the worker home page", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 2, name: "Badge artwork" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Print speakers" })).toBeVisible();
   await expect(page.locator("#badge-preview").getByRole("heading", { name: "Ada Lovelace" })).toBeVisible();
+  await expect(page.locator("#people-list").getByText("Import CSV rows to generate badges.")).toBeVisible();
+  await expect(page.locator("#role-counts dd")).toHaveText(["0", "0", "0"]);
   await expect(page.locator(".badge").first()).toBeVisible();
 });
 
