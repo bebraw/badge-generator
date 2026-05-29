@@ -244,34 +244,36 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 100%;
+    display: grid;
+    width: 86mm;
+    justify-items: center;
     transform: translate(-50%, -50%);
   }
 
   .badge-name {
-    max-width: 88mm;
+    max-width: 82mm;
     overflow-wrap: anywhere;
-    font-size: 31pt;
+    font-size: 28pt;
     font-weight: 700;
-    line-height: 0.9;
+    line-height: 0.94;
   }
 
   .badge-name--long {
-    font-size: 25pt;
+    font-size: 23pt;
   }
 
   .badge-name--compact {
-    font-size: 19pt;
-    line-height: 0.96;
+    font-size: 18pt;
+    line-height: 1;
   }
 
   .badge-company {
-    margin-top: 4mm;
-    max-width: 84mm;
+    margin-top: 3mm;
+    max-width: 72mm;
     overflow-wrap: anywhere;
-    font-size: 13.5pt;
+    font-size: 12.5pt;
     font-weight: 500;
-    line-height: 1.15;
+    line-height: 1.2;
   }
 
   .role-counts {
