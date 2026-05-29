@@ -1,12 +1,117 @@
-# vibe-template
+# Future Frontend Badge Generator
 
-`vibe-template` currently ships as a Cloudflare Worker application served with Wrangler, implemented in JavaScript/TypeScript, and centered on server-rendered HTML with a small JSON API stub.
+This repository is a web application for designing, previewing, and printing round conference badges for [Future Frontend](https://futurefrontend.com/).
 
-This is a template for my vibecoding projects and it captures what I consider my best practices so I don't have to repeat them for each experiment.
+The immediate target is the Future Frontend 2026 badge run: 10 cm diameter round coaster badges with one hole at the top, generated from attendee CSV data and exported through a print-ready browser PDF flow.
 
-The repo vendors ASDLC reference material in `.asdlc/` as local guidance instead of recreating it per project. Repo-specific truth lives in `ARCHITECTURE.md`, `specs/`, and `docs/adrs/`: generated code still needs to match those documents, and passing CI alone is not enough.
+## Badge Brief
 
-Local development in this repo targets macOS. Other platforms may need script and tooling adjustments before the baseline workflow works as documented.
+- Physical format: round coaster badge, 100 mm diameter.
+- Hardware constraint: one top hole near 12 o'clock for a standard lanyard. Exact hole placement is left to the printer, but the artwork must keep the top area clear.
+- Safe margin: keep all required content at least 8 mm away from the coaster edge. Treat the hole area as additional no-content space.
+- Badge types:
+  - Speaker: black badge with white text.
+  - Organizer: grey badge with dark or white text depending on final contrast checks.
+  - Attendee: white badge with black text.
+- Required content:
+  - Future Frontend conference logo from `2026-with-text.svg`.
+  - Attendee name.
+  - Attendee company, optional.
+- Source data: CSV files containing attendee names and companies.
+- Output: print-ready A4 PDFs produced from the browser print dialog or an equivalent in-app print view.
+- Print grouping: generate separate print views/PDFs for speakers, organizers, and attendees.
+- Typography: Finlandica. The official Finland Toolbox page says Finlandica is the Suomi Finland visual identity typeface, with Regular and Bold available, and recommends Finlandica Headline for headings and Finlandica Text for body text: <https://toolbox.finland.fi/brand-identity-and-guidelines/finlandica-font/>.
+
+## Product Goals
+
+The application should make badge production repeatable without turning the repo into a heavy publishing system.
+
+1. Preview a single badge design at physical scale.
+2. Switch between attendee, speaker, and organizer variants.
+3. Import CSV attendee data.
+4. Validate imported rows before printing.
+5. Preview all generated badges.
+6. Print or save separate A4 PDFs for each badge role.
+
+## Proposed Badge Designs
+
+The first implementation should keep the design system simple and accessible:
+
+- Use a circular 100 mm artboard with visible trim boundary in preview mode.
+- Reserve the top hole area with a no-content zone centered around 12 o'clock.
+- Keep the logo, name, and company inside the 8 mm safe margin.
+- Place the Future Frontend logo in the upper-middle area below the hole safety zone.
+- Set the attendee name as the primary typographic element, centered and large enough to read at arm's length.
+- Place the company below the name in a smaller weight or size. Hide the company line completely when missing.
+- Keep role color variants identical in layout so CSV data and print pagination stay predictable.
+- Use Finlandica Headline Bold for names and role labels, and Finlandica Text Regular for company text and supporting UI.
+- Use dynamic text fitting for long names and companies rather than clipping.
+
+Initial color direction:
+
+| Badge type | Background                  | Text  | Notes                                                               |
+| ---------- | --------------------------- | ----- | ------------------------------------------------------------------- |
+| Speaker    | Black                       | White | Highest contrast, strongest stage-facing variant.                   |
+| Organizer  | Winter grey or neutral grey | Black | Final grey should pass WCAG contrast against the chosen text color. |
+| Attendee   | White                       | Black | Clean default badge for the largest batch.                          |
+
+## CSV Contract
+
+The first supported CSV shape should be explicit and forgiving:
+
+```csv
+name,company,type
+Ada Lovelace,Analytical Engines,speaker
+Grace Hopper,,
+Linus Torvalds,Linux Foundation,attendee
+```
+
+Fields:
+
+- `name`: required.
+- `company`: optional.
+- `type`: optional; defaults to `attendee`. Supported values are `attendee`, `speaker`, and `organizer`.
+
+The importer should report row-level errors for missing names and unknown badge types. It should trim whitespace and preserve non-ASCII names.
+
+## Application Plan
+
+This repo currently ships as a Cloudflare Worker application with server-rendered HTML, TypeScript, Tailwind, and local quality gates. The badge generator can build on that baseline.
+
+1. Replace the starter page with a badge-generator workspace.
+2. Add typed domain models for badge people, badge types, CSV parse results, and print layout settings.
+3. Add client-side modules for CSV import, preview state, and print preparation. Keep browser code out of inline Worker HTML.
+4. Add reusable view components for:
+   - single badge preview,
+   - role variant controls,
+   - CSV import and validation summary,
+   - imported attendee table,
+   - print sheet preview.
+5. Add print CSS with physical units:
+   - A4 `@page` output,
+   - 100 mm circular badge boxes,
+   - optional trim and hole guides hidden or configurable for final print.
+6. Add role-specific print routes or views so speaker, organizer, and attendee PDFs can be saved independently.
+7. Add tests for CSV parsing, badge type defaults, validation errors, and render output.
+8. Add browser tests for import, preview switching, and print view generation.
+
+## Print Planning Notes
+
+Known print defaults:
+
+- Use A4 PDF output.
+- Separate output by role: one speaker PDF, one organizer PDF, and one attendee PDF.
+- Keep an 8 mm safe margin around the coaster edge.
+- Leave final hole placement to the printer, while keeping the top lanyard area clear.
+
+Open print details to confirm before final implementation:
+
+- Whether the printing company prefers one badge per A4 page or multiple badges per A4 sheet.
+- Required bleed, trim marks, and whether the hole guide should appear in final artwork.
+- Exact standard lanyard hole diameter, if the printer wants the app to draw a guide.
+- Whether the printer needs RGB PDF from browser output or CMYK-ready artwork from another export path.
+
+Until printer-specific details are known, the safest first milestone is a browser print view with accurate 100 mm badge geometry, A4 pagination, role-specific PDFs, an 8 mm content safe margin, and optional on-screen print guides.
 
 ## Documentation
 
@@ -14,7 +119,6 @@ Local development in this repo targets macOS. Other platforms may need script an
 - Architecture decisions: `docs/adrs/README.md`
 - Feature and architecture specs: `specs/README.md`
 - Agent behavior and project rules: `AGENTS.md`
-- Partial-upgrade capability kits: `.capabilities/`
 
 ## Runtime
 
@@ -22,10 +126,10 @@ Local development in this repo targets macOS. Other platforms may need script an
 - Install dependencies with `npm install`.
 - `npm install` also configures the repo-managed `pre-push` hook so `git push` runs `npm run quality:gate:fast` before code leaves your machine.
 - The exact project Node.js version is pinned in `package.json` and mirrored in `.nvmrc` for `nvm` users, and CI reads the `package.json` value directly.
-- npm is also pinned exactly in `package.json`; local development is expected to use `nvm use`, and CI upgrades npm to the exact repo pin when the bundled npm version differs.
+- npm is constrained in `package.json`; local development is expected to use `nvm use`.
 - Copy `.dev.vars.example` to `.dev.vars` before running projects that need local secrets.
-- Use repo-pinned CLI tools through `npx`, including `npx wrangler` for Cloudflare-based experiments.
-- Start the stub Worker with `npm run dev`, then open `http://127.0.0.1:8787`.
+- Use repo-pinned CLI tools through `npx`, including `npx wrangler`.
+- Start the Worker with `npm run dev`, then open `http://127.0.0.1:8787`.
 - Rebuild the generated Tailwind stylesheet manually with `npm run build:css` when needed.
 
 ## Verification
@@ -41,36 +145,9 @@ Local development in this repo targets macOS. Other platforms may need script an
 - Run browser tests from colocated `src/**/*.e2e.ts` files with `npm run e2e`.
 - Run mutation tests against runtime `src/**/*.ts` files with `npm run mutation`.
 
-## Capability Kits
-
-Use `.capabilities/` when another project needs one template practice without adopting the whole starter. Each kit is a reviewable partial-upgrade guide with a README, manifest, package-manager recipe, copyable files, and validation checks.
-
-To apply a kit to another repo:
-
-1. Pick the smallest matching kit from `.capabilities/README.md`.
-2. Read the kit README and `manifest.json`.
-3. Follow the target package-manager recipe under `recipes/`.
-4. Copy or merge files from `files/` without overwriting target-project conventions.
-5. Ask before applying optional adjacent setup such as creating a GitHub Actions workflow.
-6. Run the kit checks and the target repo's normal quality gate.
-
-For existing projects where the right kit set is unclear, start with the negotiation prompt in `.capabilities/README.md`. It asks an agent to inspect the target repo, present a checkbox-style capability pull plan, and wait for approval before editing files.
-
-## Starter App
-
-- `GET /` serves a minimal editorial Worker stub with a route index and a primary health-probe link.
-- `GET /styles.css` serves the generated Tailwind stylesheet.
-- `GET /api/health` serves a JSON health response for smoke tests and tooling.
-
 ## Source Layout
 
 - `src/worker.ts` is the Worker entry point and top-level router.
 - `src/api/` holds API response modules such as the health endpoint.
-- `src/views/` holds HTML rendering modules for the starter UI.
+- `src/views/` holds HTML rendering modules.
 - Tests live next to the code they exercise under `src/`.
-
-## Application Screenshot
-
-![Starter app screenshot](docs/screenshots/home.png)
-
-Refresh this asset manually when the starter UI changes materially.
