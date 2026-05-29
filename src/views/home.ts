@@ -7,20 +7,7 @@ Grace Hopper,,organizer
 Linus Torvalds,Linux Foundation,attendee`;
 
 export function renderHomePage(routes: Array<{ path: string; purpose: string }>): string {
-  const routeList = routes
-    .map(
-      (route) =>
-        `<li>
-          <a class="group flex items-start justify-between gap-4 py-3 first:pt-0 last:pb-0" href="${escapeHtml(route.path)}">
-            <div>
-              <code class="text-sm font-semibold text-ink">${escapeHtml(route.path)}</code>
-              <p class="mt-1 max-w-2xl text-sm leading-6 text-muted">${escapeHtml(route.purpose)}</p>
-            </div>
-            <span class="pt-1 text-xs font-semibold uppercase text-green transition group-hover:text-ink">Open</span>
-          </a>
-        </li>`,
-    )
-    .join("");
+  void routes;
 
   return `<!doctype html>
 <html lang="en">
@@ -67,10 +54,6 @@ export function renderHomePage(routes: Array<{ path: string; purpose: string }>)
           </div>
         </div>
 
-        <details class="panel-section">
-          <summary class="panel-heading cursor-pointer">Routes</summary>
-          <ul class="mt-3 divide-y divide-line">${routeList}</ul>
-        </details>
       </section>
 
       <section class="preview-stage" aria-labelledby="preview-heading">

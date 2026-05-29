@@ -12,10 +12,10 @@ describe("renderHomePage", () => {
     expect(html).toContain("A4");
     expect(html).toContain("Print speakers");
     expect(html).toContain("name,company,type");
-    expect(html).toContain("Badge generator workspace");
-    expect(html).toContain("JSON health endpoint for tooling and smoke tests");
     expect(html).toContain('rel="stylesheet" href="/styles.css"');
     expect(html).toContain('type="module" src="/badge-app.js"');
+    expect(html).not.toContain("Routes");
+    expect(html).not.toContain("JSON health endpoint for tooling and smoke tests");
     expect(html).not.toContain("Stryker was here!");
   });
 });

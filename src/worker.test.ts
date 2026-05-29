@@ -16,7 +16,7 @@ describe("worker", () => {
     const body = await response.text();
     expect(body).toContain("Future Frontend Badge Generator");
     expect(body).toContain("/badge-app.js");
-    expect(body).toContain("/api/health");
+    expect(body).not.toContain("/api/health");
   });
 
   it("returns a JSON health response", async () => {
