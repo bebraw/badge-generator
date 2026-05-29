@@ -193,7 +193,7 @@
 
   .badge--guides::after {
     position: absolute;
-    inset: 8mm;
+    inset: 5mm;
     border: 1px dashed rgb(0 107 84 / 0.48);
     border-radius: 50%;
     content: "";
@@ -202,7 +202,7 @@
 
   .badge-hole {
     position: absolute;
-    top: 7mm;
+    top: 4mm;
     left: 50%;
     width: 8mm;
     height: 8mm;
@@ -215,8 +215,8 @@
     position: absolute;
     top: 0;
     left: 50%;
-    width: 34mm;
-    height: 24mm;
+    width: 32mm;
+    height: 14mm;
     border-radius: 0 0 999px 999px;
     transform: translateX(-50%);
   }
@@ -224,17 +224,16 @@
   .badge-content {
     z-index: 1;
     display: grid;
-    width: calc(100% - 24mm);
-    min-height: 62mm;
-    align-content: center;
+    position: absolute;
+    inset: 15mm 5mm 7mm;
+    grid-template-rows: auto 1fr;
     justify-items: center;
-    padding-top: 8mm;
     text-align: center;
   }
 
   .badge-logo {
-    width: 47mm;
-    max-height: 23mm;
+    width: 52mm;
+    max-height: 24mm;
     object-fit: contain;
   }
 
@@ -242,36 +241,34 @@
     filter: invert(1);
   }
 
-  .badge-role {
-    margin-top: 5mm;
-    font-size: 10pt;
-    font-weight: 700;
-    text-transform: uppercase;
+  .badge-person {
+    align-self: center;
+    width: 100%;
+    transform: translateY(4mm);
   }
 
   .badge-name {
-    margin-top: 5mm;
-    max-width: 76mm;
+    max-width: 88mm;
     overflow-wrap: anywhere;
-    font-size: 24pt;
+    font-size: 31pt;
     font-weight: 700;
-    line-height: 0.94;
+    line-height: 0.9;
   }
 
   .badge-name--long {
-    font-size: 20pt;
+    font-size: 25pt;
   }
 
   .badge-name--compact {
-    font-size: 16pt;
-    line-height: 1;
+    font-size: 19pt;
+    line-height: 0.96;
   }
 
   .badge-company {
-    margin-top: 3mm;
-    max-width: 70mm;
+    margin-top: 4mm;
+    max-width: 84mm;
     overflow-wrap: anywhere;
-    font-size: 11pt;
+    font-size: 13.5pt;
     font-weight: 500;
     line-height: 1.15;
   }

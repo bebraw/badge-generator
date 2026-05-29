@@ -8,7 +8,7 @@ The immediate target is the Future Frontend 2026 badge run: 10 cm diameter round
 
 - Physical format: round coaster badge, 100 mm diameter.
 - Hardware constraint: one top hole near 12 o'clock for a standard lanyard. Exact hole placement is left to the printer, but the artwork must keep the top area clear.
-- Safe margin: keep all required content at least 8 mm away from the coaster edge. Treat the hole area as additional no-content space.
+- Safe margin: keep all required content at least 5 mm away from the coaster edge. Treat the hole area as additional no-content space.
 - Badge types:
   - Speaker: black badge with white text.
   - Organizer: grey badge with dark or white text depending on final contrast checks.
@@ -39,10 +39,11 @@ The first implementation should keep the design system simple and accessible:
 
 - Use a circular 100 mm artboard with visible trim boundary in preview mode.
 - Reserve the top hole area with a no-content zone centered around 12 o'clock.
-- Keep the logo, name, and company inside the 8 mm safe margin.
-- Place the Future Frontend logo in the upper-middle area below the hole safety zone.
+- Keep the logo, name, and company inside the 5 mm safe margin.
+- Place the Future Frontend logo near the top while keeping about 15 mm between the top edge of the coaster and the logo.
 - Set the attendee name as the primary typographic element, centered and large enough to read at arm's length.
 - Place the company below the name in a smaller weight or size. Hide the company line completely when missing.
+- Do not print the role name on the badge; the role is already clear from the badge color.
 - Keep role color variants identical in layout so CSV data and print pagination stay predictable.
 - Use Finlandica Headline Bold for names and role labels, and Finlandica Text Regular for company text and supporting UI.
 - Use dynamic text fitting for long names and companies rather than clipping.
@@ -101,7 +102,7 @@ Known print defaults:
 
 - Use A4 PDF output.
 - Separate output by role: one speaker PDF, one organizer PDF, and one attendee PDF.
-- Keep an 8 mm safe margin around the coaster edge.
+- Keep a 5 mm safe margin around the coaster edge.
 - Leave final hole placement to the printer, while keeping the top lanyard area clear.
 
 Open print details to confirm before final implementation:
@@ -111,7 +112,7 @@ Open print details to confirm before final implementation:
 - Exact standard lanyard hole diameter, if the printer wants the app to draw a guide.
 - Whether the printer needs RGB PDF from browser output or CMYK-ready artwork from another export path.
 
-Until printer-specific details are known, the safest first milestone is a browser print view with accurate 100 mm badge geometry, A4 pagination, role-specific PDFs, an 8 mm content safe margin, and optional on-screen print guides.
+Until printer-specific details are known, the safest first milestone is a browser print view with accurate 100 mm badge geometry, A4 pagination, role-specific PDFs, a 5 mm content safe margin, and optional on-screen print guides.
 
 ## Documentation
 

@@ -189,9 +189,10 @@ function renderBadge(person: BadgePerson, options: { readonly guides: boolean })
     <div class="badge-safe" aria-hidden="true"></div>
     <div class="badge-content">
       <img class="badge-logo" src="/assets/future-frontend-2026.svg" alt="Future Frontend 2026">
-      <p class="badge-role">${escapeHtml(roleLabels[person.type])}</p>
-      <h3 class="badge-name ${nameSize}">${escapeHtml(person.name)}</h3>
-      ${company}
+      <div class="badge-person">
+        <h3 class="badge-name ${nameSize}">${escapeHtml(person.name)}</h3>
+        ${company}
+      </div>
     </div>
   </article>`;
 }

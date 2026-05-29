@@ -9,7 +9,7 @@ The badge generator produces printable Future Frontend conference badges from CS
 - Badges are circular coaster-style badges with a 100 mm diameter.
 - Each badge has one top hole near 12 o'clock for a standard lanyard.
 - Final hole placement is controlled by the printer, so app artwork must keep the top lanyard area clear.
-- Required badge content must stay at least 8 mm away from the coaster edge.
+- Required badge content must stay at least 5 mm away from the coaster edge.
 - The top lanyard area is additional no-content space beyond the edge safe margin.
 
 ## Badge Roles
@@ -28,7 +28,7 @@ Each badge contains:
 - attendee name,
 - optional attendee company.
 
-Name is the primary readable element. Company is hidden when missing rather than leaving an empty line.
+The logo sits near the top with about 15 mm between the coaster top edge and the logo. Name is the primary readable element. Company is hidden when missing rather than leaving an empty line. The badge role is not printed on the badge because the role is communicated through the badge color.
 
 ## CSV Input
 
