@@ -224,13 +224,15 @@
   .badge-content {
     z-index: 1;
     position: absolute;
-    inset: 15mm 5mm 7mm;
+    inset: 18mm 5mm 7mm;
     text-align: center;
   }
 
   .badge-logo {
-    width: 52mm;
-    max-height: 24mm;
+    display: block;
+    width: 47mm;
+    max-height: 23mm;
+    margin-inline: auto;
     object-fit: contain;
   }
 
