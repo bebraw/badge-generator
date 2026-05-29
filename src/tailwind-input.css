@@ -223,11 +223,8 @@
 
   .badge-content {
     z-index: 1;
-    display: grid;
     position: absolute;
     inset: 15mm 5mm 7mm;
-    grid-template-rows: auto 1fr;
-    justify-items: center;
     text-align: center;
   }
 
@@ -242,9 +239,11 @@
   }
 
   .badge-person {
-    align-self: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
     width: 100%;
-    transform: translateY(4mm);
+    transform: translate(-50%, -50%);
   }
 
   .badge-name {
