@@ -397,5 +397,7 @@
     outline: 0.25mm solid rgb(0 0 0 / 0.8);
     outline-offset: -0.25mm;
     box-shadow: none;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 }
