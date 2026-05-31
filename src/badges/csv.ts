@@ -1,4 +1,4 @@
-import { type BadgePerson, type CsvIssue, type CsvParseResult, isBadgeType } from "./model";
+import { type BadgePerson, type CsvImportMapping, type CsvIssue, type CsvParseResult, isBadgeType } from "./model";
 
 interface CsvRecord {
   readonly row: number;
@@ -9,8 +9,13 @@ type CsvColumn = "name" | "company" | "type";
 
 const requiredColumns = ["name"] as const;
 const supportedColumns = new Set<CsvColumn>(["name", "company", "type"]);
+const defaultColumnAliases: Record<CsvColumn, readonly string[]> = {
+  name: ["name", "full name", "ticket full name"],
+  company: ["company", "company name", "ticket company name"],
+  type: ["type", "role"],
+};
 
-export function parseBadgeCsv(csv: string): CsvParseResult {
+export function parseBadgeCsv(csv: string, mapping: CsvImportMapping = {}): CsvParseResult {
   const records = parseCsvRecords(csv);
   const issues: CsvIssue[] = [];
   const header = records[0];
@@ -19,8 +24,7 @@ export function parseBadgeCsv(csv: string): CsvParseResult {
     return { people: [], issues: [{ row: 1, message: "CSV is empty." }] };
   }
 
-  const columns = header.cells.map((cell) => cell.trim().toLowerCase());
-  const columnIndexes = mapColumns(columns, issues);
+  const columnIndexes = mapColumns(header.cells, mapping, issues);
 
   for (const column of requiredColumns) {
     if (columnIndexes[column] === undefined) {
@@ -32,19 +36,24 @@ export function parseBadgeCsv(csv: string): CsvParseResult {
     return { people: [], issues };
   }
 
-  const people = records.slice(1).flatMap((record) => parsePersonRecord(record, columnIndexes, issues));
+  const people = records.slice(1).flatMap((record) => parsePersonRecord(record, columnIndexes, mapping, issues));
 
   return { people, issues };
 }
 
-function parsePersonRecord(record: CsvRecord, columns: Partial<Record<CsvColumn, number>>, issues: CsvIssue[]): BadgePerson[] {
+function parsePersonRecord(
+  record: CsvRecord,
+  columns: Partial<Record<CsvColumn, number>>,
+  mapping: CsvImportMapping,
+  issues: CsvIssue[],
+): BadgePerson[] {
   if (record.cells.every((cell) => cell.trim() === "")) {
     return [];
   }
 
   const name = readCell(record, columns.name).trim();
   const company = readCell(record, columns.company).trim();
-  const rawType = readCell(record, columns.type).trim().toLowerCase();
+  const rawType = mapping.fixedType ?? readCell(record, columns.type).trim().toLowerCase();
   const type = rawType === "" ? "attendee" : rawType;
 
   if (name === "") {
@@ -66,16 +75,41 @@ function parsePersonRecord(record: CsvRecord, columns: Partial<Record<CsvColumn,
   ];
 }
 
-function mapColumns(columns: string[], issues: CsvIssue[]): Partial<Record<CsvColumn, number>> {
+function mapColumns(headerCells: string[], mapping: CsvImportMapping, issues: CsvIssue[]): Partial<Record<CsvColumn, number>> {
   const indexes: Partial<Record<CsvColumn, number>> = {};
+  const columns = headerCells.map(normalizeColumnName);
+  const requestedColumns: Partial<Record<CsvColumn, string | undefined>> = {
+    name: mapping.nameColumn,
+    company: mapping.companyColumn,
+    type: mapping.typeColumn,
+  };
 
-  columns.forEach((column, index) => {
-    if (supportedColumns.has(column as CsvColumn)) {
-      indexes[column as CsvColumn] = index;
+  for (const column of supportedColumns) {
+    const requestedColumn = requestedColumns[column];
+
+    if (requestedColumn !== undefined) {
+      const requestedIndex = findColumnIndex(columns, requestedColumn);
+
+      if (requestedIndex === undefined) {
+        issues.push({ row: 1, message: `Mapped "${column}" column "${requestedColumn}" was not found.` });
+      } else {
+        indexes[column] = requestedIndex;
+      }
+
+      continue;
     }
-  });
 
-  const unsupportedColumns = columns.filter((column) => column !== "" && !supportedColumns.has(column as CsvColumn));
+    const aliasIndex = findAliasIndex(columns, defaultColumnAliases[column]);
+
+    if (aliasIndex !== undefined) {
+      indexes[column] = aliasIndex;
+    }
+  }
+
+  const supportedIndexes = new Set(Object.values(indexes));
+  const unsupportedColumns = columns.filter(
+    (column, index) => column !== "" && !supportedColumns.has(column as CsvColumn) && !supportedIndexes.has(index),
+  );
 
   if (unsupportedColumns.length > 0) {
     issues.push({ row: 1, message: `Ignoring unsupported columns: ${unsupportedColumns.join(", ")}.` });
@@ -90,6 +124,20 @@ function readCell(record: CsvRecord, index: number | undefined): string {
   }
 
   return record.cells[index] ?? "";
+}
+
+function findAliasIndex(columns: string[], aliases: readonly string[]): number | undefined {
+  return aliases.map((alias) => columns.indexOf(alias)).find((index) => index !== -1);
+}
+
+function findColumnIndex(columns: string[], column: string): number | undefined {
+  const index = columns.indexOf(normalizeColumnName(column));
+
+  return index === -1 ? undefined : index;
+}
+
+function normalizeColumnName(column: string): string {
+  return column.trim().toLowerCase();
 }
 
 function parseCsvRecords(csv: string): CsvRecord[] {

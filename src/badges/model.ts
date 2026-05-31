@@ -18,6 +18,13 @@ export interface CsvParseResult {
   readonly issues: CsvIssue[];
 }
 
+export interface CsvImportMapping {
+  readonly nameColumn?: string;
+  readonly companyColumn?: string;
+  readonly typeColumn?: string;
+  readonly fixedType?: BadgeType;
+}
+
 export function isBadgeType(value: string): value is BadgeType {
   return badgeTypes.includes(value as BadgeType);
 }

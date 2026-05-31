@@ -73,6 +73,8 @@ Fields:
 - `company`: optional.
 - `type`: optional; defaults to `attendee`. Supported values are `attendee`, `speaker`, and `organizer`.
 
+Wider ticketing exports can be imported by mapping columns in the app. The importer recognizes `Ticket Full Name` as a default name source and `Ticket Company Name` as a default company source. For exports where ticket names are products rather than badge roles, set one fixed import role before updating badges.
+
 The importer should report row-level errors for missing names and unknown badge types. It should trim whitespace and preserve non-ASCII names.
 
 ## Application Plan
@@ -102,6 +104,7 @@ Known print defaults:
 
 - Use A4 PDF output.
 - Separate output by role: one speaker PDF, one organizer PDF, and one attendee PDF.
+- Include a visible circular card outline in printed PDFs for the printer.
 - Keep a 5 mm safe margin around the coaster edge.
 - Leave final hole placement to the printer, while keeping the top lanyard area clear.
 
@@ -137,7 +140,7 @@ Until printer-specific details are known, the safest first milestone is a browse
 
 - Run the fast local gate with `npm run quality:gate:fast` during normal iteration.
 - Run the baseline repo gate with `npm run quality:gate`.
-- Run the containerized local workflow with `npm run ci:local`.
+- Run the containerized local workflow with `npm run ci:local`; it uses Agent CI parallelism with a local install lock and pauses failed runners for retry.
 - The repo-managed `pre-push` hook runs `npm run quality:gate:fast` automatically after `npm install`.
 - If local Agent CI warns about `No such remote 'origin'`, set `GITHUB_REPO=owner/repo` in `.env.agent-ci`.
 - Retry a paused local CI run with `npm run ci:local:retry -- --name <runner-name>`.

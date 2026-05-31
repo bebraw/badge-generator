@@ -40,6 +40,14 @@ export function renderHomePage(routes: Array<{ path: string; purpose: string }>)
           <input id="csv-file" class="file-input" type="file" accept=".csv,text/csv">
           <label class="field-label mt-4" for="csv-input">CSV contents</label>
           <textarea id="csv-input" class="csv-input" spellcheck="false">${escapeHtml(sampleCsv)}</textarea>
+          <div class="mapping-grid" aria-label="CSV field mapping">
+            <label class="field-label" for="name-column">Name column</label>
+            <select id="name-column" class="field-select"></select>
+            <label class="field-label" for="company-column">Company column</label>
+            <select id="company-column" class="field-select"></select>
+            <label class="field-label" for="import-type">Import role</label>
+            <select id="import-type" class="field-select"></select>
+          </div>
           <button id="load-csv" class="primary-button" type="button">Update badges</button>
           <div id="csv-status" class="status-message" role="status" aria-live="polite">Sample data loaded.</div>
         </div>

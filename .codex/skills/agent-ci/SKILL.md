@@ -21,7 +21,7 @@ Cache is bind-mounted. When a step fails, the container can pause so you can fix
 
 Use this repo's pinned `agent-ci` dependency through package scripts.
 
-- Run the local workflow quietly: `npm run ci:local`
+- Run the local workflow quietly with pause-on-failure: `npm run ci:local`
 - Run all relevant workflows when needed: `./node_modules/.bin/agent-ci run --all`
 - Run all workflows with pause-on-failure: `./node_modules/.bin/agent-ci run --all --pause-on-failure`
 - Collapse matrix jobs for a smaller local run: `./node_modules/.bin/agent-ci run --all --no-matrix`
@@ -36,5 +36,9 @@ Use this repo's pinned `agent-ci` dependency through package scripts.
 - Do not use `--from-start` when only the last step failed; use retry with no extra flags to re-run only the failed step.
 - Use `AI_AGENT=1` or `--quiet` for cleaner agent logs.
 - Prefer `--no-matrix` when matrix combinations are not the thing being tested.
+
+## Machine-readable output
+
+For programmatic monitoring, add `--json` or set `AGENT_CI_JSON=1` to emit one JSON object per line on stdout. The stream includes `run.start`, `job.start`, `job.finish`, `step.start`, `step.finish`, `run.paused`, `run.finish`, and `diagnostic` events. Under `--json`, parse `run.paused` for the runner name and retry command instead of grepping plaintext logs.
 
 Repeat the local run or retry loop until all jobs pass.

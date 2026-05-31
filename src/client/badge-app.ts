@@ -16,6 +16,12 @@ interface CsvRecord {
   readonly cells: string[];
 }
 
+interface CsvImportMapping {
+  readonly nameColumnIndex?: number;
+  readonly companyColumnIndex?: number;
+  readonly fixedType?: BadgeType;
+}
+
 const badgeTypes: readonly BadgeType[] = ["attendee", "speaker", "organizer"];
 const roleLabels: Record<BadgeType, string> = {
   speaker: "Speaker",
@@ -35,13 +41,16 @@ const csvInput = requiredElement<HTMLTextAreaElement>("csv-input");
 const fileInput = requiredElement<HTMLInputElement>("csv-file");
 const loadButton = requiredElement<HTMLButtonElement>("load-csv");
 const statusElement = requiredElement<HTMLElement>("csv-status");
+const nameColumnSelect = requiredElement<HTMLSelectElement>("name-column");
+const companyColumnSelect = requiredElement<HTMLSelectElement>("company-column");
+const importTypeSelect = requiredElement<HTMLSelectElement>("import-type");
 const previewElement = requiredElement<HTMLElement>("badge-preview");
 const peopleListElement = requiredElement<HTMLElement>("people-list");
 const roleCountsElement = requiredElement<HTMLElement>("role-counts");
 const printRoot = requiredElement<HTMLElement>("print-root");
 
 loadButton.addEventListener("click", () => {
-  loadCsv(csvInput.value);
+  loadCsv(csvInput.value, readImportMapping());
 });
 
 fileInput.addEventListener("change", () => {
@@ -53,8 +62,13 @@ fileInput.addEventListener("change", () => {
 
   void file.text().then((text) => {
     csvInput.value = text;
-    loadCsv(text);
+    renderCsvMappingControls(text);
+    statusElement.textContent = "CSV loaded. Review field mapping and import role, then update badges.";
   });
+});
+
+csvInput.addEventListener("input", () => {
+  renderCsvMappingControls(csvInput.value);
 });
 
 document.querySelectorAll<HTMLButtonElement>("[data-preview-role]").forEach((button) => {
@@ -85,10 +99,11 @@ document.querySelectorAll<HTMLButtonElement>("[data-print-role]").forEach((butto
 });
 
 statusElement.textContent = "No CSV imported yet. Preview uses sample badges.";
+renderCsvMappingControls(csvInput.value);
 render();
 
-function loadCsv(csv: string): void {
-  const result = parseBadgeCsv(csv);
+function loadCsv(csv: string, mapping: CsvImportMapping): void {
+  const result = parseBadgeCsv(csv, mapping);
   people = result.people;
 
   if (result.issues.length > 0) {
@@ -98,6 +113,58 @@ function loadCsv(csv: string): void {
   }
 
   render();
+}
+
+function renderCsvMappingControls(csv: string): void {
+  const header = parseCsvRecords(csv)[0]?.cells ?? [];
+  const normalizedHeader = header.map(normalizeColumnName);
+  const defaultNameIndex = findColumnAliasIndex(normalizedHeader, ["name", "full name", "ticket full name"]);
+  const defaultCompanyIndex = findColumnAliasIndex(normalizedHeader, ["company", "company name", "ticket company name"]);
+
+  renderColumnSelect(nameColumnSelect, header, defaultNameIndex);
+  renderColumnSelect(companyColumnSelect, header, defaultCompanyIndex, "No company column");
+  renderImportTypeSelect();
+}
+
+function renderColumnSelect(select: HTMLSelectElement, header: string[], selectedIndex: number | undefined, emptyLabel?: string): void {
+  const options = header
+    .map((column, index) => `<option value="${index}"${index === selectedIndex ? " selected" : ""}>${escapeHtml(column)}</option>`)
+    .join("");
+  const emptyOption =
+    emptyLabel === undefined ? "" : `<option value=""${selectedIndex === undefined ? " selected" : ""}>${escapeHtml(emptyLabel)}</option>`;
+
+  select.innerHTML = `${emptyOption}${options}`;
+}
+
+function renderImportTypeSelect(): void {
+  importTypeSelect.innerHTML = badgeTypes
+    .map(
+      (type) =>
+        `<option value="${type}"${type === "attendee" ? " selected" : ""}>All ${escapeHtml(roleLabels[type].toLowerCase())}s</option>`,
+    )
+    .join("");
+}
+
+function readImportMapping(): CsvImportMapping {
+  const fixedType = parseBadgeType(importTypeSelect.value);
+  const nameColumnIndex = readSelectedColumnIndex(nameColumnSelect);
+  const companyColumnIndex = readSelectedColumnIndex(companyColumnSelect);
+
+  return {
+    ...(nameColumnIndex === undefined ? {} : { nameColumnIndex }),
+    ...(companyColumnIndex === undefined ? {} : { companyColumnIndex }),
+    ...(fixedType === undefined ? {} : { fixedType }),
+  };
+}
+
+function readSelectedColumnIndex(select: HTMLSelectElement): number | undefined {
+  if (select.value === "") {
+    return undefined;
+  }
+
+  const index = Number(select.value.replace("column:", ""));
+
+  return Number.isInteger(index) ? index : undefined;
 }
 
 function render(): void {
@@ -199,7 +266,7 @@ function renderBadge(person: BadgePerson, options: { readonly guides: boolean })
   </article>`;
 }
 
-function parseBadgeCsv(csv: string): { readonly people: BadgePerson[]; readonly issues: CsvIssue[] } {
+function parseBadgeCsv(csv: string, mapping: CsvImportMapping): { readonly people: BadgePerson[]; readonly issues: CsvIssue[] } {
   const records = parseCsvRecords(csv);
   const issues: CsvIssue[] = [];
   const header = records[0];
@@ -208,10 +275,11 @@ function parseBadgeCsv(csv: string): { readonly people: BadgePerson[]; readonly 
     return { people: [], issues: [{ row: 1, message: "CSV is empty." }] };
   }
 
-  const columns = header.cells.map((cell) => cell.trim().toLowerCase());
-  const nameIndex = columns.indexOf("name");
-  const companyIndex = columns.indexOf("company");
-  const typeIndex = columns.indexOf("type");
+  const columns = header.cells.map(normalizeColumnName);
+  const nameIndex = mapping.nameColumnIndex ?? findColumnAliasIndex(columns, ["name", "full name", "ticket full name"]) ?? -1;
+  const companyIndex =
+    mapping.companyColumnIndex ?? findColumnAliasIndex(columns, ["company", "company name", "ticket company name"]) ?? -1;
+  const typeIndex = findColumnAliasIndex(columns, ["type", "role"]) ?? -1;
 
   if (nameIndex === -1) {
     return { people: [], issues: [{ row: 1, message: 'Missing required "name" column.' }] };
@@ -224,7 +292,7 @@ function parseBadgeCsv(csv: string): { readonly people: BadgePerson[]; readonly 
 
     const name = readCell(record, nameIndex).trim();
     const company = companyIndex === -1 ? "" : readCell(record, companyIndex).trim();
-    const rawType = typeIndex === -1 ? "" : readCell(record, typeIndex).trim().toLowerCase();
+    const rawType = mapping.fixedType ?? (typeIndex === -1 ? "" : readCell(record, typeIndex).trim().toLowerCase());
     const type = rawType === "" ? "attendee" : parseBadgeType(rawType);
 
     if (name === "") {
@@ -291,6 +359,10 @@ function parseCsvRecords(csv: string): CsvRecord[] {
   return records;
 }
 
+function findColumnAliasIndex(columns: string[], aliases: readonly string[]): number | undefined {
+  return aliases.map((alias) => columns.indexOf(alias)).find((index) => index !== -1);
+}
+
 function parseBadgeType(value: string): BadgeType | undefined {
   return badgeTypes.find((type) => type === value);
 }
@@ -301,6 +373,10 @@ function readCell(record: CsvRecord, index: number): string {
 
 function trimCarriageReturn(value: string): string {
   return value.endsWith("\r") ? value.slice(0, -1) : value;
+}
+
+function normalizeColumnName(column: string): string {
+  return column.trim().toLowerCase();
 }
 
 function requiredElement<ElementType extends HTMLElement>(id: string): ElementType {

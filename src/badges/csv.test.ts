@@ -25,6 +25,36 @@ Linus Torvalds,Linux Foundation,attendee`),
     });
   });
 
+  it("maps Tito-style ticket columns and applies a fixed import type", () => {
+    expect(
+      parseBadgeCsv(
+        `Number,Ticket,Ticket Full Name,Ticket Company Name,Ticket Email
+1,Team Pass,Example Organizer,Example Events,organizer@example.test
+2,Team Pass,Sample Helper,,helper@example.test`,
+        { fixedType: "organizer" },
+      ),
+    ).toEqual({
+      people: [
+        { name: "Example Organizer", company: "Example Events", type: "organizer" },
+        { name: "Sample Helper", type: "organizer" },
+      ],
+      issues: [{ row: 1, message: "Ignoring unsupported columns: number, ticket, ticket email." }],
+    });
+  });
+
+  it("uses explicit mapping when the source columns are not recognized aliases", () => {
+    expect(
+      parseBadgeCsv(`Display,Affiliation\nExample Attendee,Example Company`, {
+        nameColumn: "Display",
+        companyColumn: "Affiliation",
+        fixedType: "attendee",
+      }),
+    ).toEqual({
+      people: [{ name: "Example Attendee", company: "Example Company", type: "attendee" }],
+      issues: [],
+    });
+  });
+
   it("reports missing names and unknown badge types by row", () => {
     expect(parseBadgeCsv(`name,company,type\n,Company,speaker\nAda Lovelace,Math,vip`)).toEqual({
       people: [],
