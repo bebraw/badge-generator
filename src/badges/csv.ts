@@ -1,4 +1,4 @@
-import { type BadgePerson, type CsvImportMapping, type CsvIssue, type CsvParseResult, isBadgeType } from "./model";
+import { type BadgePerson, type CsvImportMapping, type CsvIssue, type CsvParseResult, parseBadgeType } from "./model";
 
 interface CsvRecord {
   readonly row: number;
@@ -12,7 +12,7 @@ const supportedColumns = new Set<CsvColumn>(["name", "company", "type"]);
 const defaultColumnAliases: Record<CsvColumn, readonly string[]> = {
   name: ["name", "full name", "ticket full name"],
   company: ["company", "company name", "ticket company name"],
-  type: ["type", "role"],
+  type: ["type", "role", "ticket type", "badge type"],
 };
 
 export function parseBadgeCsv(csv: string, mapping: CsvImportMapping = {}): CsvParseResult {
@@ -53,15 +53,15 @@ function parsePersonRecord(
 
   const name = readCell(record, columns.name).trim();
   const company = readCell(record, columns.company).trim();
-  const rawType = mapping.fixedType ?? readCell(record, columns.type).trim().toLowerCase();
-  const type = rawType === "" ? "attendee" : rawType;
+  const rawType = mapping.fixedType ?? readCell(record, columns.type).trim();
+  const type = rawType === "" ? "attendee" : parseBadgeType(rawType);
 
   if (name === "") {
     issues.push({ row: record.row, message: "Missing attendee name." });
     return [];
   }
 
-  if (!isBadgeType(type)) {
+  if (!type) {
     issues.push({ row: record.row, message: `Unknown badge type "${rawType}".` });
     return [];
   }

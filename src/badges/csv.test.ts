@@ -18,6 +18,20 @@ Linus Torvalds,Linux Foundation,attendee`),
     });
   });
 
+  it("parses attendee day-pass badge types", () => {
+    expect(
+      parseBadgeCsv(`name,company,type
+Sofia Saarinen,Studio Example,design
+Martin Fowler,Thoughtworks,Development Day`),
+    ).toEqual({
+      people: [
+        { name: "Sofia Saarinen", company: "Studio Example", type: "design" },
+        { name: "Martin Fowler", company: "Thoughtworks", type: "development" },
+      ],
+      issues: [],
+    });
+  });
+
   it("keeps quoted commas and escaped quotes in cells", () => {
     expect(parseBadgeCsv(`name,company,type\n"Virtanen, Aino","Hello ""World"" Oy",organizer`)).toEqual({
       people: [{ name: "Virtanen, Aino", company: 'Hello "World" Oy', type: "organizer" }],

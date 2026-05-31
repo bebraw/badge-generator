@@ -1,9 +1,10 @@
-type BadgeType = "attendee" | "speaker" | "organizer";
+type BadgeType = "attendee" | "design" | "development" | "speaker" | "organizer";
 
 interface BadgePerson {
-  readonly name: string;
+  readonly name?: string;
   readonly company?: string;
   readonly type: BadgeType;
+  readonly blank?: true;
 }
 
 interface CsvIssue {
@@ -22,16 +23,47 @@ interface CsvImportMapping {
   readonly fixedType?: BadgeType;
 }
 
-const badgeTypes: readonly BadgeType[] = ["attendee", "speaker", "organizer"];
+const badgeTypes: readonly BadgeType[] = ["attendee", "design", "development", "speaker", "organizer"];
+const printClassNames = badgeTypes.map((type) => `print-${type}`);
+const badgeTypeAliases: Record<string, BadgeType> = {
+  regular: "attendee",
+  "regular attendee": "attendee",
+  "regular attendees": "attendee",
+  "full pass": "attendee",
+  design: "design",
+  "design day": "design",
+  "design day attendee": "design",
+  development: "development",
+  dev: "development",
+  "dev day": "development",
+  "development day": "development",
+  "development day attendee": "development",
+};
 const roleLabels: Record<BadgeType, string> = {
   speaker: "Speaker",
   organizer: "Organizer",
-  attendee: "Attendee",
+  attendee: "Regular",
+  design: "Design Day",
+  development: "Development Day",
+};
+const importLabels: Record<BadgeType, string> = {
+  speaker: "All speakers",
+  organizer: "All organizers",
+  attendee: "All regular attendees",
+  design: "All design day attendees",
+  development: "All development day attendees",
+};
+const passLabels: Partial<Record<BadgeType, string>> = {
+  attendee: "Full Pass",
+  design: "Design Day",
+  development: "Dev Day",
 };
 const previewPeople: Record<BadgeType, BadgePerson> = {
   speaker: { name: "Ada Lovelace", company: "Analytical Engines", type: "speaker" },
   organizer: { name: "Grace Hopper", type: "organizer" },
   attendee: { name: "Linus Torvalds", company: "Linux Foundation", type: "attendee" },
+  design: { name: "Aino Designer", company: "Future Studio", type: "design" },
+  development: { name: "Edsger Dijkstra", company: "Technische Universiteit Eindhoven", type: "development" },
 };
 
 let people: BadgePerson[] = [];
@@ -44,6 +76,9 @@ const statusElement = requiredElement<HTMLElement>("csv-status");
 const nameColumnSelect = requiredElement<HTMLSelectElement>("name-column");
 const companyColumnSelect = requiredElement<HTMLSelectElement>("company-column");
 const importTypeSelect = requiredElement<HTMLSelectElement>("import-type");
+const blankTypeSelect = requiredElement<HTMLSelectElement>("blank-type");
+const blankCountInput = requiredElement<HTMLInputElement>("blank-count");
+const addBlankBadgesButton = requiredElement<HTMLButtonElement>("add-blank-badges");
 const previewElement = requiredElement<HTMLElement>("badge-preview");
 const peopleListElement = requiredElement<HTMLElement>("people-list");
 const roleCountsElement = requiredElement<HTMLElement>("role-counts");
@@ -51,6 +86,10 @@ const printRoot = requiredElement<HTMLElement>("print-root");
 
 loadButton.addEventListener("click", () => {
   loadCsv(csvInput.value, readImportMapping());
+});
+
+addBlankBadgesButton.addEventListener("click", () => {
+  addBlankBadges();
 });
 
 fileInput.addEventListener("change", () => {
@@ -92,7 +131,7 @@ document.querySelectorAll<HTMLButtonElement>("[data-print-role]").forEach((butto
       return;
     }
 
-    document.body.classList.remove("print-speaker", "print-organizer", "print-attendee");
+    document.body.classList.remove(...printClassNames);
     document.body.classList.add(`print-${role}`);
     window.print();
   });
@@ -100,11 +139,13 @@ document.querySelectorAll<HTMLButtonElement>("[data-print-role]").forEach((butto
 
 statusElement.textContent = "No CSV imported yet. Preview uses sample badges.";
 renderCsvMappingControls(csvInput.value);
+renderBlankTypeSelect();
 render();
 
 function loadCsv(csv: string, mapping: CsvImportMapping): void {
   const result = parseBadgeCsv(csv, mapping);
   people = result.people;
+  previewRole = people[0]?.type ?? previewRole;
 
   if (result.issues.length > 0) {
     statusElement.innerHTML = result.issues.map((issue) => `<p>Row ${issue.row}: ${escapeHtml(issue.message)}</p>`).join("");
@@ -138,11 +179,29 @@ function renderColumnSelect(select: HTMLSelectElement, header: string[], selecte
 
 function renderImportTypeSelect(): void {
   importTypeSelect.innerHTML = badgeTypes
-    .map(
-      (type) =>
-        `<option value="${type}"${type === "attendee" ? " selected" : ""}>All ${escapeHtml(roleLabels[type].toLowerCase())}s</option>`,
-    )
+    .map((type) => `<option value="${type}"${type === "attendee" ? " selected" : ""}>${escapeHtml(importLabels[type])}</option>`)
     .join("");
+}
+
+function renderBlankTypeSelect(): void {
+  blankTypeSelect.innerHTML = badgeTypes
+    .map((type) => `<option value="${type}"${type === "attendee" ? " selected" : ""}>${escapeHtml(roleLabels[type])}</option>`)
+    .join("");
+}
+
+function addBlankBadges(): void {
+  const type = parseBadgeType(blankTypeSelect.value);
+  const count = Number(blankCountInput.value);
+
+  if (!type || !Number.isInteger(count) || count < 1 || count > 500) {
+    statusElement.textContent = "Enter a blank badge amount from 1 to 500.";
+    return;
+  }
+
+  people = [...people, ...Array.from({ length: count }, () => ({ type, blank: true }) satisfies BadgePerson)];
+  statusElement.textContent = `${count} blank ${roleLabels[type].toLowerCase()} badge${count === 1 ? "" : "s"} added.`;
+  previewRole = type;
+  render();
 }
 
 function readImportMapping(): CsvImportMapping {
@@ -198,8 +257,8 @@ function renderPeopleList(): void {
     .map(
       (person, index) => `<button class="person-row" type="button" data-person-index="${index}">
         <span>
-          <strong>${escapeHtml(person.name)}</strong>
-          <small>${escapeHtml(person.company ?? "No company")}</small>
+          <strong>${escapeHtml(formatPersonName(person))}</strong>
+          <small>${escapeHtml(formatPersonCompany(person))}</small>
         </span>
         <em>${escapeHtml(roleLabels[person.type])}</em>
       </button>`,
@@ -249,21 +308,43 @@ function renderPrintSheets(): void {
 
 function renderBadge(person: BadgePerson, options: { readonly guides: boolean }): string {
   const company = person.company ? `<p class="badge-company">${escapeHtml(person.company)}</p>` : "";
-  const nameLength = person.name.length;
+  const name = person.name ?? "";
+  const nameLength = name.length;
   const nameSize = nameLength > 34 ? "badge-name--compact" : nameLength > 24 ? "badge-name--long" : "";
+  const nameMarkup = name === "" ? "" : `<h3 class="badge-name ${nameSize}">${escapeHtml(name)}</h3>`;
+  const personMarkup =
+    nameMarkup === "" && company === ""
+      ? ""
+      : `<div class="badge-person">
+        ${nameMarkup}
+        ${company}
+      </div>`;
   const guideClass = options.guides ? " badge--guides" : "";
+  const ariaLabel = person.blank ? `Blank ${roleLabels[person.type]} badge` : `${roleLabels[person.type]} badge for ${person.name ?? ""}`;
+  const passLabel = passLabels[person.type];
+  const passMarkup = passLabel === undefined ? "" : `<p class="badge-pass">${escapeHtml(passLabel)}</p>`;
 
-  return `<article class="badge badge--${person.type}${guideClass}" aria-label="${escapeHtml(roleLabels[person.type])} badge for ${escapeHtml(person.name)}">
+  return `<article class="badge badge--${person.type}${guideClass}" aria-label="${escapeHtml(ariaLabel)}">
     <div class="badge-hole" aria-hidden="true"></div>
     <div class="badge-safe" aria-hidden="true"></div>
     <div class="badge-content">
       <img class="badge-logo" src="/assets/future-frontend-2026.svg" alt="Future Frontend 2026">
-      <div class="badge-person">
-        <h3 class="badge-name ${nameSize}">${escapeHtml(person.name)}</h3>
-        ${company}
-      </div>
+      ${personMarkup}
     </div>
+    ${passMarkup}
   </article>`;
+}
+
+function formatPersonName(person: BadgePerson): string {
+  return person.blank ? "Blank badge" : (person.name ?? "");
+}
+
+function formatPersonCompany(person: BadgePerson): string {
+  if (person.blank) {
+    return "No name or company";
+  }
+
+  return person.company ?? "No company";
 }
 
 function parseBadgeCsv(csv: string, mapping: CsvImportMapping): { readonly people: BadgePerson[]; readonly issues: CsvIssue[] } {
@@ -279,7 +360,7 @@ function parseBadgeCsv(csv: string, mapping: CsvImportMapping): { readonly peopl
   const nameIndex = mapping.nameColumnIndex ?? findColumnAliasIndex(columns, ["name", "full name", "ticket full name"]) ?? -1;
   const companyIndex =
     mapping.companyColumnIndex ?? findColumnAliasIndex(columns, ["company", "company name", "ticket company name"]) ?? -1;
-  const typeIndex = findColumnAliasIndex(columns, ["type", "role"]) ?? -1;
+  const typeIndex = findColumnAliasIndex(columns, ["type", "role", "ticket type", "badge type"]) ?? -1;
 
   if (nameIndex === -1) {
     return { people: [], issues: [{ row: 1, message: 'Missing required "name" column.' }] };
@@ -292,7 +373,7 @@ function parseBadgeCsv(csv: string, mapping: CsvImportMapping): { readonly peopl
 
     const name = readCell(record, nameIndex).trim();
     const company = companyIndex === -1 ? "" : readCell(record, companyIndex).trim();
-    const rawType = mapping.fixedType ?? (typeIndex === -1 ? "" : readCell(record, typeIndex).trim().toLowerCase());
+    const rawType = mapping.fixedType ?? (typeIndex === -1 ? "" : readCell(record, typeIndex).trim());
     const type = rawType === "" ? "attendee" : parseBadgeType(rawType);
 
     if (name === "") {
@@ -364,7 +445,8 @@ function findColumnAliasIndex(columns: string[], aliases: readonly string[]): nu
 }
 
 function parseBadgeType(value: string): BadgeType | undefined {
-  return badgeTypes.find((type) => type === value);
+  const normalizedValue = value.trim().toLowerCase();
+  return badgeTypes.find((type) => type === normalizedValue) ?? badgeTypeAliases[normalizedValue];
 }
 
 function readCell(record: CsvRecord, index: number): string {

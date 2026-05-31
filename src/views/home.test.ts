@@ -11,9 +11,14 @@ describe("renderHomePage", () => {
     expect(html).toContain("5 mm");
     expect(html).toContain("A4");
     expect(html).toContain("Print speakers");
+    expect(html).toContain("Print design day");
+    expect(html).toContain("Print development day");
     expect(html).toContain('id="name-column"');
     expect(html).toContain('id="company-column"');
     expect(html).toContain('id="import-type"');
+    expect(html).toContain('id="blank-type"');
+    expect(html).toContain('id="blank-count"');
+    expect(html).toContain('id="add-blank-badges"');
     expect(html).toContain("name,company,type");
     expect(html).toContain('rel="stylesheet" href="/styles.css"');
     expect(html).toContain('type="module" src="/badge-app.js"');

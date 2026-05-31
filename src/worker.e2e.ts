@@ -8,7 +8,7 @@ test("renders the worker home page", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Print speakers" })).toBeVisible();
   await expect(page.locator("#badge-preview").getByRole("heading", { name: "Ada Lovelace" })).toBeVisible();
   await expect(page.locator("#people-list").getByText("Import CSV rows to generate badges.")).toBeVisible();
-  await expect(page.locator("#role-counts dd")).toHaveText(["0", "0", "0"]);
+  await expect(page.locator("#role-counts dd")).toHaveText(["0", "0", "0", "0", "0"]);
   await expect(page.locator(".badge").first()).toBeVisible();
 });
 
@@ -50,7 +50,13 @@ test("imports ticketing exports with mapped columns and a fixed role", async ({ 
     .getByLabel("CSV contents")
     .fill("Number,Ticket,Ticket Full Name,Ticket Company Name\n1,Team Pass,Example Person,Example Events");
 
-  await expect(page.getByLabel("Import role").locator("option")).toHaveText(["All attendees", "All speakers", "All organizers"]);
+  await expect(page.getByLabel("Import role").locator("option")).toHaveText([
+    "All regular attendees",
+    "All design day attendees",
+    "All development day attendees",
+    "All speakers",
+    "All organizers",
+  ]);
   await page.getByLabel("Import role").selectOption({ label: "All organizers" });
   await page.getByRole("button", { name: "Update badges" }).click();
 
@@ -58,4 +64,30 @@ test("imports ticketing exports with mapped columns and a fixed role", async ({ 
   await expect(page.locator("#people-list").getByText("Example Person")).toBeVisible();
   await expect(page.locator("#people-list").getByText("Example Events")).toBeVisible();
   await expect(page.locator("#people-list").getByText("Organizer")).toBeVisible();
+});
+
+test("adds blank badges for the selected role", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("Role", { exact: true }).selectOption({ label: "Speaker" });
+  await page.getByLabel("Amount").fill("3");
+  await page.getByRole("button", { name: "Add blank badges" }).click();
+
+  await expect(page.getByText("3 blank speaker badges added.")).toBeVisible();
+  await expect(page.locator("#role-counts dd")).toHaveText(["0", "0", "0", "3", "0"]);
+  await expect(page.locator("#people-list").getByText("Blank badge")).toHaveCount(3);
+  await expect(page.locator("#badge-preview").getByRole("heading")).toHaveCount(0);
+  await expect(page.locator("#badge-preview .badge--speaker")).toBeVisible();
+});
+
+test("imports separate attendee day-pass CSVs with visible pass labels", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("CSV contents").fill("name,company\nSofia Saarinen,Studio Example");
+  await page.getByLabel("Import role").selectOption({ label: "All design day attendees" });
+  await page.getByRole("button", { name: "Update badges" }).click();
+
+  await expect(page.getByText("1 badge ready.")).toBeVisible();
+  await expect(page.locator("#people-list").getByText("Sofia Saarinen")).toBeVisible();
+  await expect(page.locator("#people-list").getByText("Design Day")).toBeVisible();
+  await expect(page.locator("#badge-preview .badge--design")).toBeVisible();
+  await expect(page.locator("#badge-preview").getByText("Design Day")).toBeVisible();
 });

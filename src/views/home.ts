@@ -4,7 +4,9 @@ const appTitle = "Future Frontend Badge Generator";
 const sampleCsv = `name,company,type
 Ada Lovelace,Analytical Engines,speaker
 Grace Hopper,,organizer
-Linus Torvalds,Linux Foundation,attendee`;
+Linus Torvalds,Linux Foundation,attendee
+Aino Designer,Future Studio,design
+Edsger Dijkstra,Technische Universiteit Eindhoven,development`;
 
 export function renderHomePage(routes: Array<{ path: string; purpose: string }>): string {
   void routes;
@@ -53,11 +55,24 @@ export function renderHomePage(routes: Array<{ path: string; purpose: string }>)
         </div>
 
         <div class="panel-section">
+          <h2 class="panel-heading">Blank Badges</h2>
+          <div class="blank-controls">
+            <label class="field-label" for="blank-type">Role</label>
+            <select id="blank-type" class="field-select"></select>
+            <label class="field-label" for="blank-count">Amount</label>
+            <input id="blank-count" class="field-input" type="number" min="1" max="500" step="1" value="1">
+          </div>
+          <button id="add-blank-badges" class="secondary-button blank-button" type="button">Add blank badges</button>
+        </div>
+
+        <div class="panel-section">
           <h2 class="panel-heading">Role PDFs</h2>
-          <div class="print-buttons" aria-label="Print separate PDFs by role">
+          <div class="print-buttons" aria-label="Print separate PDFs by badge type">
             <button class="secondary-button" type="button" data-print-role="speaker">Print speakers</button>
             <button class="secondary-button" type="button" data-print-role="organizer">Print organizers</button>
-            <button class="secondary-button" type="button" data-print-role="attendee">Print attendees</button>
+            <button class="secondary-button" type="button" data-print-role="attendee">Print regular</button>
+            <button class="secondary-button" type="button" data-print-role="design">Print design day</button>
+            <button class="secondary-button" type="button" data-print-role="development">Print development day</button>
           </div>
         </div>
 
@@ -72,7 +87,9 @@ export function renderHomePage(routes: Array<{ path: string; purpose: string }>)
           <div class="role-tabs" role="tablist" aria-label="Preview role">
             <button class="role-tab" type="button" data-preview-role="speaker" aria-selected="true">Speaker</button>
             <button class="role-tab" type="button" data-preview-role="organizer" aria-selected="false">Organizer</button>
-            <button class="role-tab" type="button" data-preview-role="attendee" aria-selected="false">Attendee</button>
+            <button class="role-tab" type="button" data-preview-role="attendee" aria-selected="false">Regular</button>
+            <button class="role-tab" type="button" data-preview-role="design" aria-selected="false">Design</button>
+            <button class="role-tab" type="button" data-preview-role="development" aria-selected="false">Development</button>
           </div>
         </div>
         <div id="badge-preview" class="badge-preview-shell" aria-live="polite"></div>

@@ -12,14 +12,16 @@ The immediate target is the Future Frontend 2026 badge run: 10 cm diameter round
 - Badge types:
   - Speaker: black badge with white text.
   - Organizer: grey badge with dark or white text depending on final contrast checks.
-  - Attendee: white badge with black text.
+  - Regular attendee: white badge with black text and a full-pass strip.
+  - Design day attendee: white badge with black text and a design-day strip.
+  - Development day attendee: white badge with black text and a development-day strip.
 - Required content:
   - Future Frontend conference logo from `2026-with-text.svg`.
   - Attendee name.
   - Attendee company, optional.
 - Source data: CSV files containing attendee names and companies.
 - Output: print-ready A4 PDFs produced from the browser print dialog or an equivalent in-app print view.
-- Print grouping: generate separate print views/PDFs for speakers, organizers, and attendees.
+- Print grouping: generate separate print views/PDFs for speakers, organizers, regular attendees, design-day attendees, and development-day attendees.
 - Typography: Finlandica. The official Finland Toolbox page says Finlandica is the Suomi Finland visual identity typeface, with Regular and Bold available, and recommends Finlandica Headline for headings and Finlandica Text for body text: <https://toolbox.finland.fi/brand-identity-and-guidelines/finlandica-font/>.
 
 ## Product Goals
@@ -27,7 +29,7 @@ The immediate target is the Future Frontend 2026 badge run: 10 cm diameter round
 The application should make badge production repeatable without turning the repo into a heavy publishing system.
 
 1. Preview a single badge design at physical scale.
-2. Switch between attendee, speaker, and organizer variants.
+2. Switch between attendee pass, speaker, and organizer variants.
 3. Import CSV attendee data.
 4. Validate imported rows before printing.
 5. Preview all generated badges.
@@ -43,7 +45,7 @@ The first implementation should keep the design system simple and accessible:
 - Place the Future Frontend logo near the top while keeping about 15 mm between the top edge of the coaster and the logo.
 - Set the attendee name as the primary typographic element, centered and large enough to read at arm's length.
 - Place the company below the name in a smaller weight or size. Hide the company line completely when missing.
-- Do not print the role name on the badge; the role is already clear from the badge color.
+- Print an explicit pass strip on attendee badges so regular, Design day, and Development day tickets can be checked at a glance.
 - Keep role color variants identical in layout so CSV data and print pagination stay predictable.
 - Use Finlandica Headline Bold for names and role labels, and Finlandica Text Regular for company text and supporting UI.
 - Use dynamic text fitting for long names and companies rather than clipping.
@@ -65,15 +67,17 @@ name,company,type
 Ada Lovelace,Analytical Engines,speaker
 Grace Hopper,,
 Linus Torvalds,Linux Foundation,attendee
+Aino Designer,Future Studio,design
+Edsger Dijkstra,Technische Universiteit Eindhoven,development
 ```
 
 Fields:
 
 - `name`: required.
 - `company`: optional.
-- `type`: optional; defaults to `attendee`. Supported values are `attendee`, `speaker`, and `organizer`.
+- `type`: optional; defaults to `attendee`. Supported values are `attendee`, `design`, `development`, `speaker`, and `organizer`.
 
-Wider ticketing exports can be imported by mapping columns in the app. The importer recognizes `Ticket Full Name` as a default name source and `Ticket Company Name` as a default company source. For exports where ticket names are products rather than badge roles, set one fixed import role before updating badges.
+Wider ticketing exports can be imported by mapping columns in the app. The importer recognizes `Ticket Full Name` as a default name source and `Ticket Company Name` as a default company source. For exports where ticket names are products rather than badge roles, set one fixed import role before updating badges. Separate CSV files can be imported as regular attendees, design-day attendees, or development-day attendees through the same fixed import role control.
 
 The importer should report row-level errors for missing names and unknown badge types. It should trim whitespace and preserve non-ASCII names.
 
@@ -94,7 +98,7 @@ This repo currently ships as a Cloudflare Worker application with server-rendere
    - A4 `@page` output,
    - 100 mm circular badge boxes,
    - optional trim and hole guides hidden or configurable for final print.
-6. Add role-specific print routes or views so speaker, organizer, and attendee PDFs can be saved independently.
+6. Add type-specific print routes or views so speaker, organizer, regular attendee, design-day attendee, and development-day attendee PDFs can be saved independently.
 7. Add tests for CSV parsing, badge type defaults, validation errors, and render output.
 8. Add browser tests for import, preview switching, and print view generation.
 
@@ -103,7 +107,7 @@ This repo currently ships as a Cloudflare Worker application with server-rendere
 Known print defaults:
 
 - Use A4 PDF output.
-- Separate output by role: one speaker PDF, one organizer PDF, and one attendee PDF.
+- Separate output by type: speaker, organizer, regular attendee, design-day attendee, and development-day attendee PDFs.
 - Include a visible circular card outline in printed PDFs for the printer.
 - Keep a 5 mm safe margin around the coaster edge.
 - Leave final hole placement to the printer, while keeping the top lanyard area clear.
