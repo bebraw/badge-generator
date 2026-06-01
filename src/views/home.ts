@@ -30,7 +30,7 @@ export function renderHomePage(routes: Array<{ path: string; purpose: string }>)
           <div class="grid gap-1 text-sm text-muted sm:grid-cols-3 lg:min-w-[33rem]">
             <p><strong class="block text-ink">100 mm</strong> round coaster</p>
             <p><strong class="block text-ink">5 mm</strong> content safe margin</p>
-            <p><strong class="block text-ink">A4</strong> role-separated PDFs</p>
+            <p><strong class="block text-ink">100 x 100 mm</strong> role-separated PDFs</p>
           </div>
         </div>
       </header>

@@ -423,7 +423,7 @@
 
 @media print {
   @page {
-    size: A4;
+    size: 100mm 100mm;
     margin: 0;
   }
 
@@ -442,8 +442,8 @@
 
   .print-sheet {
     display: none;
-    width: 210mm;
-    height: 297mm;
+    width: 100mm;
+    height: 100mm;
     page-break-after: always;
     place-items: center;
   }

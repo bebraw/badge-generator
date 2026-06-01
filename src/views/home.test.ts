@@ -9,7 +9,7 @@ describe("renderHomePage", () => {
     expect(html).toContain("Future Frontend Badge Generator");
     expect(html).toContain("100 mm");
     expect(html).toContain("5 mm");
-    expect(html).toContain("A4");
+    expect(html).toContain("100 x 100 mm");
     expect(html).toContain("Print speakers");
     expect(html).toContain("Print design day");
     expect(html).toContain("Print development day");

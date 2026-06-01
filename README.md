@@ -20,7 +20,7 @@ The immediate target is the Future Frontend 2026 badge run: 10 cm diameter round
   - Attendee name.
   - Attendee company, optional.
 - Source data: CSV files containing attendee names and companies.
-- Output: print-ready A4 PDFs produced from the browser print dialog or an equivalent in-app print view.
+- Output: print-ready PDFs with one 100 mm by 100 mm page per badge, produced from the browser print dialog or an equivalent in-app print view.
 - Print grouping: generate separate print views/PDFs for speakers, organizers, regular attendees, design-day attendees, and development-day attendees.
 - Typography: Finlandica. The official Finland Toolbox page says Finlandica is the Suomi Finland visual identity typeface, with Regular and Bold available, and recommends Finlandica Headline for headings and Finlandica Text for body text: <https://toolbox.finland.fi/brand-identity-and-guidelines/finlandica-font/>.
 
@@ -33,7 +33,7 @@ The application should make badge production repeatable without turning the repo
 3. Import CSV attendee data.
 4. Validate imported rows before printing.
 5. Preview all generated badges.
-6. Print or save separate A4 PDFs for each badge role.
+6. Print or save separate 100 mm square PDFs for each badge role.
 
 ## Proposed Badge Designs
 
@@ -95,8 +95,8 @@ This repo currently ships as a Cloudflare Worker application with server-rendere
    - imported attendee table,
    - print sheet preview.
 5. Add print CSS with physical units:
-   - A4 `@page` output,
-   - 100 mm circular badge boxes,
+   - 100 mm by 100 mm `@page` output,
+   - one 100 mm circular badge per page,
    - optional trim and hole guides hidden or configurable for final print.
 6. Add type-specific print routes or views so speaker, organizer, regular attendee, design-day attendee, and development-day attendee PDFs can be saved independently.
 7. Add tests for CSV parsing, badge type defaults, validation errors, and render output.
@@ -106,7 +106,8 @@ This repo currently ships as a Cloudflare Worker application with server-rendere
 
 Known print defaults:
 
-- Use A4 PDF output.
+- Use 100 mm by 100 mm PDF pages.
+- Put one physical-size badge on each PDF page.
 - Separate output by type: speaker, organizer, regular attendee, design-day attendee, and development-day attendee PDFs.
 - Include a visible circular card outline in printed PDFs for the printer.
 - Keep a 5 mm safe margin around the coaster edge.
@@ -114,12 +115,11 @@ Known print defaults:
 
 Open print details to confirm before final implementation:
 
-- Whether the printing company prefers one badge per A4 page or multiple badges per A4 sheet.
 - Required bleed, trim marks, and whether the hole guide should appear in final artwork.
 - Exact standard lanyard hole diameter, if the printer wants the app to draw a guide.
 - Whether the printer needs RGB PDF from browser output or CMYK-ready artwork from another export path.
 
-Until printer-specific details are known, the safest first milestone is a browser print view with accurate 100 mm badge geometry, A4 pagination, role-specific PDFs, a 5 mm content safe margin, and optional on-screen print guides.
+The browser print view uses accurate 100 mm badge geometry, role-specific PDFs, a 5 mm content safe margin, and optional on-screen print guides.
 
 ## Documentation
 
