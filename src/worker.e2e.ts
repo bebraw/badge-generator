@@ -30,7 +30,15 @@ test("serves the generated stylesheet", async ({ request }) => {
   expect(response.headers()["content-type"]).toContain("text/css");
   const styles = await response.text();
   expect(styles).toContain("--color-paper");
-  expect(styles).toContain("outline:.25mm solid #000c");
+  expect(styles).toContain("background:var(--badge-bg)");
+  expect(styles).toContain(".badge{width:100mm;height:100mm;");
+  expect(styles).toContain("border-radius:0");
+  expect(styles).toContain("body.print-speaker .print-sheet.print-speaker{background:#050505}");
+  expect(styles).toContain("body.print-organizer .print-sheet.print-organizer{background:#d8d6cf}");
+  expect(styles).toContain(".badge--speaker{color:#fff;background:#050505}");
+  expect(styles).toContain(".badge--organizer{color:#101010;background:#d8d6cf}");
+  expect(styles).toContain("print-color-adjust:exact");
+  expect(styles).not.toContain("outline:.25mm solid #000c");
 });
 
 test("imports CSV rows in the browser", async ({ page }) => {

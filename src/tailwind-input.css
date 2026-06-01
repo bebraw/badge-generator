@@ -444,7 +444,7 @@
     display: none;
     width: 100mm;
     height: 100mm;
-    padding: 0.4mm;
+    padding: 0;
     page-break-after: always;
     place-items: center;
   }
@@ -457,6 +457,20 @@
     display: grid;
   }
 
+  body.print-speaker .print-sheet.print-speaker {
+    background: #050505;
+  }
+
+  body.print-organizer .print-sheet.print-organizer {
+    background: #d8d6cf;
+  }
+
+  body.print-attendee .print-sheet.print-attendee,
+  body.print-design .print-sheet.print-design,
+  body.print-development .print-sheet.print-development {
+    background: #ffffff;
+  }
+
   .print-empty {
     font-size: 16pt;
   }
@@ -467,12 +481,28 @@
   }
 
   .badge {
-    width: calc(100mm - 0.8mm);
-    height: calc(100mm - 0.8mm);
-    outline: 0.25mm solid rgb(0 0 0 / 0.8);
-    outline-offset: -0.25mm;
+    width: 100mm;
+    height: 100mm;
+    border-radius: 0;
     box-shadow: none;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
+  }
+
+  .badge--speaker {
+    color: #ffffff;
+    background: #050505;
+  }
+
+  .badge--organizer {
+    color: #101010;
+    background: #d8d6cf;
+  }
+
+  .badge--attendee,
+  .badge--design,
+  .badge--development {
+    color: #101010;
+    background: #ffffff;
   }
 }
