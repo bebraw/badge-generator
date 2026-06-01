@@ -108,6 +108,7 @@ Known print defaults:
 
 - Use 100 mm by 100 mm PDF pages.
 - Put one physical-size badge on each PDF page.
+- Keep a sub-millimeter internal inset so browser PDF output does not clip the circular edge.
 - Separate output by type: speaker, organizer, regular attendee, design-day attendee, and development-day attendee PDFs.
 - Include a visible circular card outline in printed PDFs for the printer.
 - Keep a 5 mm safe margin around the coaster edge.

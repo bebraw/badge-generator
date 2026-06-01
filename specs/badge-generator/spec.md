@@ -76,6 +76,7 @@ The parser must:
 
 - Output targets browser print/PDF with 100 mm by 100 mm pages.
 - Each PDF page contains one physical-size badge that fills the page box.
+- Printed badges keep a sub-millimeter inset from the page edge to avoid browser PDF edge clipping.
 - The application provides separate print views for speakers, organizers, regular attendees, design-day attendees, and development-day attendees.
 - Printed badges must request exact print color adjustment so role backgrounds match the on-screen preview when the browser allows background graphics.
 - Printed badges must include a visible circular card outline so the printer can see the badge boundary in generated PDFs, including white attendee badges.

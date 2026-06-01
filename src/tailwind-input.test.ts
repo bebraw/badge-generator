@@ -8,6 +8,9 @@ describe("badge print styles", () => {
     expect(css).toContain("size: 100mm 100mm;");
     expect(css).toContain("width: 100mm;");
     expect(css).toContain("height: 100mm;");
+    expect(css).toContain("padding: 0.4mm;");
+    expect(css).toContain("width: calc(100mm - 0.8mm);");
+    expect(css).toContain("height: calc(100mm - 0.8mm);");
     expect(css).not.toContain("size: A4;");
     expect(css).not.toContain("width: 210mm;");
     expect(css).not.toContain("height: 297mm;");

@@ -444,6 +444,7 @@
     display: none;
     width: 100mm;
     height: 100mm;
+    padding: 0.4mm;
     page-break-after: always;
     place-items: center;
   }
@@ -466,6 +467,8 @@
   }
 
   .badge {
+    width: calc(100mm - 0.8mm);
+    height: calc(100mm - 0.8mm);
     outline: 0.25mm solid rgb(0 0 0 / 0.8);
     outline-offset: -0.25mm;
     box-shadow: none;
